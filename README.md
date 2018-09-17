@@ -8,3 +8,6 @@ Seelih is a marketplace for renting daily things. Seelih (silih) comes from java
   - [Gorilla Mux](https://github.com/gorilla/mux) - Routing
   - [Gorm](https://github.com/jinzhu/gorm) - ORM
   - [PostgreSQL](https://github.com/lib/pq) - PostgreSQL driver
+
+## Entity Relationship Diagram
+![ERD](https://github.com/axellageraldinc/seelih-backend/blob/master/ERD.png)
