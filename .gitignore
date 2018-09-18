@@ -6,6 +6,7 @@
 
 # User-specific stuff:
 .idea/workspace.xml
+.idea/vcs.xml
 
 # Sensitive or high-churn files:
 .idea/**/dataSources/
