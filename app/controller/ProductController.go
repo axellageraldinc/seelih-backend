@@ -38,12 +38,15 @@ func GetOneProductDetails(w http.ResponseWriter, r *http.Request)  {
 	productId := parameters["productId"]
 
 	var product Product
+	var response WebResponse
 
-	db.Where("id = ?", productId).Find(&product)
-
-	productDetailResponse := mapper.ToProductDetailResponse(product)
-
-	response := OK(productDetailResponse)
+	if db.Where("id = ?", productId).Find(&product).RecordNotFound() {
+		golog.Warn("product with ID " + productId + " not found!")
+		response = ERROR(130)
+	} else {
+		productDetailResponse := mapper.ToProductDetailResponse(product)
+		response = OK(productDetailResponse)
+	}
 
 	json.NewEncoder(w).Encode(response)
 }
