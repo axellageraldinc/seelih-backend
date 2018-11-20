@@ -42,7 +42,7 @@ func GetOneProductDetails(w http.ResponseWriter, r *http.Request)  {
 
 	if db.Where("id = ?", productId).Find(&product).RecordNotFound() {
 		golog.Warn("product with ID " + productId + " not found!")
-		response = ERROR(130)
+		response = ERROR(PRODUCT_NOT_FOUND)
 	} else {
 		productDetailResponse := mapper.ToProductDetailResponse(product)
 		response = OK(productDetailResponse)
