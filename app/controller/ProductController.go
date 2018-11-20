@@ -6,6 +6,7 @@ import (
 	. "../model"
 	. "../model/response"
 	"encoding/json"
+	"github.com/gorilla/mux"
 	"github.com/kataras/golog"
 	"net/http"
 )
@@ -23,6 +24,26 @@ func GetAllAvailableProducts(w http.ResponseWriter, r *http.Request) {
 	availableProductForRentingResponseList := mapper.ToAvailableProductForRentingResponseList(products)
 
 	response := OK(availableProductForRentingResponseList)
+
+	json.NewEncoder(w).Encode(response)
+}
+
+func GetOneProductDetails(w http.ResponseWriter, r *http.Request)  {
+	golog.Info("/api/products/{productId}")
+
+	db := helper.OpenDatabaseConnection()
+	defer db.Close()
+
+	parameters := mux.Vars(r)
+	productId := parameters["productId"]
+
+	var product Product
+
+	db.Where("id = ?", productId).Find(&product)
+
+	productDetailResponse := mapper.ToProductDetailResponse(product)
+
+	response := OK(productDetailResponse)
 
 	json.NewEncoder(w).Encode(response)
 }
