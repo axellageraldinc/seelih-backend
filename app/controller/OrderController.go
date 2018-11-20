@@ -31,6 +31,12 @@ func PlaceOrder(w http.ResponseWriter, r *http.Request) {
 		if product.ProductStatus == model.CLOSED {
 			golog.Warn("Product is not available for renting")
 			response = ERROR(model.ORDER_FAILED_PRODUCT_NOT_AVAILABLE_FOR_RENTING)
+		} else if placeOrderRequest.BorrowerId == product.TenantID {
+			golog.Warn("The borrower is the tenant, can't proceed!")
+			response = ERROR(model.ORDER_FAILED_BORROWER_IS_THE_TENANT)
+		} else if placeOrderRequest.Duration < product.MinimumBorrowedTime {
+			golog.Warn("Rent duration requested by user doesn't meet the product's min rent duration")
+			response = ERROR(model.ORDER_FAILED_RENT_DURATION_DOESNT_MEET_MINIMUM_RENT_DURATION)
 		} else if placeOrderRequest.Duration > product.MaximumBorrowedTime {
 			golog.Warn("Rent duration requested by user exceeds the product's max rent duration")
 			response = ERROR(model.ORDER_FAILED_RENT_DURATION_EXCEEDS_PRODUCT_MAX_RENT_DURATION)
