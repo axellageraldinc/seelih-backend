@@ -1,7 +1,6 @@
 package response
 
 import (
-	"math/big"
 	"time"
 )
 
@@ -12,7 +11,7 @@ type ProductDetailResponse struct {
 	Sku string
 	Name string
 	Quantity uint
-	PricePerItemPerDay big.Int
+	PricePerItemPerDay uint
 	Description string
 	UploadedTime time.Time
 	MinimumBorrowedTime uint
