@@ -8,7 +8,7 @@ type User struct {
 	Password string
 	Fullname string
 	Phone string
-	City string
+	CityCodeId uint
 	Fulladdress string
 	Products []Product `gorm:"foreignkey:TenantID"`
 }

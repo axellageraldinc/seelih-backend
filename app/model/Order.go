@@ -14,4 +14,5 @@ type Order struct {
 	TotalPrice uint
 	OrderStatus string
 	DeliveryType string
+	RentDurationInDay uint
 }

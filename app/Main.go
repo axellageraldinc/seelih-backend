@@ -20,7 +20,8 @@ func connectToDatabase()  {
 			"dbname = seelih_dev " +
 			"password = postgres " +
 			"sslmode=disable")
-	db.AutoMigrate(&model.Category{}, &model.User{}, &model.Product{}, &model.Order{}) // WILL create table, add missing columns, WON'T change column type/delete column
+	//db.DropTable(&model.Category{}, &model.City{}, &model.User{}, &model.Product{}, &model.Order{}) // Uncomment this code if there's a column deletion in DB
+	db.AutoMigrate(&model.Category{}, &model.City{}, &model.User{}, &model.Product{}, &model.Order{}) // WILL create table, add missing columns, WON'T change column type/delete column
 	if err != nil {
 		golog.Warn("Error connecting to DB : ", err)
 	} else {
