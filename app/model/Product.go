@@ -1,6 +1,9 @@
 package model
 
-import "github.com/jinzhu/gorm"
+import (
+	"github.com/jinzhu/gorm"
+	"math/big"
+)
 
 type Product struct {
 	gorm.Model
@@ -9,8 +12,9 @@ type Product struct {
 	Sku string
 	Name string
 	Quantity uint
-	PricePerItemPerDay uint
+	PricePerItemPerDay big.Int
 	Description string
 	MinimumBorrowedTime uint
 	MaximumBorrowedTime uint
+	ProductStatus string
 }

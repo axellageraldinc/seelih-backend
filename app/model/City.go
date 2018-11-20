@@ -5,6 +5,6 @@ import "github.com/jinzhu/gorm"
 type City struct {
 	gorm.Model
 	Name string
-	code uint
+	Code uint
 	Users []User `gorm:"foreignkey:CityId"`
 }
