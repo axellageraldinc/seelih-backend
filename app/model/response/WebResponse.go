@@ -1,5 +1,7 @@
 package response
 
+import "net/http"
+
 type WebResponse struct {
 	HttpCode uint
 	ErrorCode uint
@@ -8,7 +10,7 @@ type WebResponse struct {
 
 func OK(object interface{}) WebResponse {
 	return WebResponse {
-		HttpCode: 200,
+		HttpCode: http.StatusOK,
 		ErrorCode: 0,
 		Data: object,
 	}
@@ -16,7 +18,7 @@ func OK(object interface{}) WebResponse {
 
 func ERROR(errorCode uint) WebResponse {
 	return WebResponse{
-		HttpCode: 200,
+		HttpCode: http.StatusOK,
 		ErrorCode: errorCode,
 		Data: nil,
 	}

@@ -11,5 +11,7 @@ func GetAllRoutes() *mux.Router {
 	routes.HandleFunc("/products", controller.GetAllAvailableProducts).Methods("GET")
 	routes.HandleFunc("/products/{productId}", controller.GetOneProductDetails).Methods("GET")
 
+	routes.HandleFunc("/orders", controller.PlaceOrder).Methods("POST")
+
 	return routes
 }
