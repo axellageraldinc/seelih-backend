@@ -8,6 +8,8 @@ import (
 func GetAllRoutes() *mux.Router {
 	routes := mux.NewRouter().StrictSlash(true).PathPrefix("/api/").Subrouter()
 
+	routes.HandleFunc("/login", controller.Login).Methods("POST")
+
 	routes.HandleFunc("/products", controller.GetAllAvailableProducts).Methods("GET")
 	routes.HandleFunc("/products/{productId}", controller.GetOneProductDetails).Methods("GET")
 
