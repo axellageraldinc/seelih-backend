@@ -10,6 +10,7 @@ import (
 	. "../model"
 	. "../model/request"
 	. "../model/response"
+	"github.com/gorilla/mux"
 	"github.com/kataras/golog"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -86,6 +87,33 @@ func Login(w http.ResponseWriter, r *http.Request) {
 			golog.Warn("Login failed, wrong password")
 			response = ERROR(LOGIN_FAILED)
 		}
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	json.NewEncoder(w).Encode(response)
+}
+
+func GetUserData(w http.ResponseWriter, r *http.Request) {
+	golog.Info("/api/users/{userId} GET")
+
+	db := helper.OpenDatabaseConnection()
+	defer db.Close()
+
+	parameters := mux.Vars(r)
+	userId := parameters["userId"]
+
+	var user User
+	var response WebResponse
+
+	if db.Where("id = ?", userId).Find(&user).RecordNotFound() {
+		golog.Warn("No such user with id: " + userId)
+		response = ERROR(LOGIN_FAILED)
+	} else {
+		db.Where("id = ?", userId).Find(&user)
+		userData := mapper.ToUserLoginDetail(user)
+		golog.Info("Get User Data Succeed")
+		response = OK(userData)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
