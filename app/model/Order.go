@@ -2,6 +2,7 @@ package model
 
 import (
 	"github.com/jinzhu/gorm"
+	"time"
 )
 
 type Order struct {
@@ -13,4 +14,5 @@ type Order struct {
 	OrderStatus string
 	DeliveryType string
 	RentDurationInDay uint
+	ReturnTime time.Time
 }
