@@ -13,7 +13,7 @@ import (
 )
 
 func Register(w http.ResponseWriter, r *http.Request) {
-	golog.Info("/api/register")
+	golog.Info("/api/users/register")
 
 	db := helper.OpenDatabaseConnection()
 	defer db.Close()
@@ -49,7 +49,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 }
 
 func Login(w http.ResponseWriter, r *http.Request) {
-	golog.Info("/api/login")
+	golog.Info("/api/users/login")
 
 	db := helper.OpenDatabaseConnection()
 	defer db.Close()

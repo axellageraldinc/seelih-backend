@@ -6,8 +6,10 @@ import (
 	. "../model/request"
 	. "../model/response"
 	"encoding/json"
+	"github.com/gorilla/mux"
 	"github.com/kataras/golog"
 	"net/http"
+	"time"
 )
 
 func PlaceOrder(w http.ResponseWriter, r *http.Request) {
@@ -54,19 +56,20 @@ func PlaceOrder(w http.ResponseWriter, r *http.Request) {
 				db.Model(&product).Update("quantity", remainingProductQuantity)
 			} else {
 				db.Model(&product).Updates(model.Product{
-					Quantity: remainingProductQuantity,
+					Quantity:      remainingProductQuantity,
 					ProductStatus: model.CLOSED,
 				})
 			}
 
 			order := model.Order{
-				ProductID: placeOrderRequest.ProductId,
-				Quantity: placeOrderRequest.Quantity,
-				BorrowerID: placeOrderRequest.BorrowerId,
-				DeliveryType: placeOrderRequest.DeliveryType,
-				OrderStatus: model.ON_PROCESS,
+				ProductID:         placeOrderRequest.ProductId,
+				Quantity:          placeOrderRequest.Quantity,
+				BorrowerID:        placeOrderRequest.BorrowerId,
+				DeliveryType:      placeOrderRequest.DeliveryType,
+				OrderStatus:       model.ON_PROCESS,
 				RentDurationInDay: placeOrderRequest.Duration,
-				TotalPrice: totalPrice,
+				TotalPrice:        totalPrice,
+				ReturnTime:        time.Now().Add(time.Hour * 24 * time.Duration(placeOrderRequest.Duration)),
 			}
 			db.Create(&order)
 			response = OK(nil)
@@ -76,6 +79,44 @@ func PlaceOrder(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
+	json.NewEncoder(w).Encode(response)
+}
+
+func GetAllOrders(w http.ResponseWriter, r *http.Request) {
+	golog.Info("/api/users/{userId}/orders")
+
+	db := helper.OpenDatabaseConnection()
+	defer db.Close()
+
+	var user model.User
+	var orderResponses []OrderResponse
+	var response WebResponse
+
+	parameters := mux.Vars(r)
+	userId := parameters["userId"]
+
+	if db.Where("id = ?", userId).Find(&user).RecordNotFound() {
+		golog.Warn("User with ID " + userId + " not found")
+		response = ERROR(model.GET_ALL_ORDERS_FAILED_USER_ID_NOT_FOUND)
+	} else {
+		rows, err := db.Raw("SELECT orders.id, products.name AS product_name, products.image_name AS image_url, orders.total_price, orders.order_status, orders.return_time "+
+			"FROM orders, products "+
+			"WHERE (orders.borrower_id = ? OR products.tenant_id = ?) AND orders.borrower_id = products.tenant_id", userId, userId).Rows()
+		defer rows.Close()
+		if err != nil {
+			golog.Warn("Error raw SQL selecting all orders " + err.Error())
+			response = ERROR(model.GET_ALL_ORDERS_FAILED_SQL_ERROR)
+		} else {
+			for rows.Next() {
+				var orderResponse OrderResponse
+				db.ScanRows(rows, &orderResponse)
+				orderResponse.ImageUrl = model.IMAGE_URL_PREFIX + orderResponse.ImageUrl
+				orderResponses = append(orderResponses, orderResponse)
+			}
+			response = OK(orderResponses)
+			golog.Info("Get all orders succeed")
+		}
+	}
 	json.NewEncoder(w).Encode(response)
 }
 
