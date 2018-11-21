@@ -1,6 +1,7 @@
 package main
 
 import (
+	"../app/controller"
 	"../app/helper"
 	"../app/model"
 	"../app/route"
@@ -25,5 +26,7 @@ func initiateMigration()  {
 func initiateRoutes()  {
 	routes := route.GetAllRoutes()
 	http.Handle("/", routes)
+	fs := http.FileServer(http.Dir(controller.UPLOAD_PATH))
+	http.Handle("/img/", http.StripPrefix("/img", fs))
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

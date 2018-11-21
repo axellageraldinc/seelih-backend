@@ -9,4 +9,5 @@ type AvailableProductForRentingResponse struct {
 	Name               string
 	PricePerItemPerDay uint
 	UploadedTime       time.Time
+	ImageUrl           string
 }

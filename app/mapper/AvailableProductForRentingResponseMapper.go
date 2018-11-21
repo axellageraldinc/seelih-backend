@@ -13,6 +13,7 @@ func ToAvailableProductForRentingResponseList(products []Product) []AvailablePro
 			Name:               products[index].Name,
 			PricePerItemPerDay: products[index].PricePerItemPerDay,
 			UploadedTime:       products[index].CreatedAt,
+			ImageUrl: IMAGE_URL_PREFIX + products[index].ImageName,
 		}
 		availableProductForRentingResponseList = append(availableProductForRentingResponseList, availableProductForRentingResponse)
 	}

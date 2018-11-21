@@ -18,7 +18,7 @@ import (
 )
 
 const maxUploadSize = 2 * 1024 * 1024 // 2 MB
-const uploadPath = "./img"
+const UPLOAD_PATH = "./img"
 
 func UploadProduct(w http.ResponseWriter, r *http.Request) {
 	golog.Info("/api/products POST")
@@ -72,6 +72,7 @@ func UploadProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	response, fileNameAndExtension := uploadImage(w, r)
 	product := Product{
 		TenantID:            uploadProductRequest.TenantId,
 		CategoryID:          uploadProductRequest.CategoryId,
@@ -83,9 +84,9 @@ func UploadProduct(w http.ResponseWriter, r *http.Request) {
 		MinimumBorrowedTime: uploadProductRequest.MinimumBorrowedTime,
 		MaximumBorrowedTime: uploadProductRequest.MaximumBorrowedTime,
 		ProductStatus:       OPENED,
+		ImageName:           fileNameAndExtension,
 	}
 	db.Create(&product)
-	response = uploadImage(w, r)
 	if response.ErrorCode == 0 {
 		golog.Info("Upload product succeed")
 	}
@@ -95,44 +96,44 @@ func UploadProduct(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
-func uploadImage(w http.ResponseWriter, r *http.Request) WebResponse {
+func uploadImage(w http.ResponseWriter, r *http.Request) (webResponse WebResponse, fileNameAndExtension string) {
 	var response = OK(nil)
 	file, _, err := r.FormFile("image")
 	if err != nil {
 		golog.Warn("Invalid file image FormFile")
-		return ERROR(UPLOAD_PRODUCT_FAILED_INVALID_FILE)
+		return ERROR(UPLOAD_PRODUCT_FAILED_INVALID_FILE), ""
 	}
 	defer file.Close()
 	fileBytes, err := ioutil.ReadAll(file)
 	if err != nil {
 		golog.Warn("Invalid file image ReadAll")
-		return ERROR(UPLOAD_PRODUCT_FAILED_INVALID_FILE)
+		return ERROR(UPLOAD_PRODUCT_FAILED_INVALID_FILE), ""
 	}
 	fileType := http.DetectContentType(fileBytes)
 	if fileType != "image/jpeg" &&
 		fileType != "image/jpg" &&
 		fileType != "image/png" {
 		golog.Warn("Invalid file type. Only accepts jpeg, jpg, and png")
-		return ERROR(UPLOAD_PRODUCT_FAILED_INVALID_FILE)
+		return ERROR(UPLOAD_PRODUCT_FAILED_INVALID_FILE), ""
 	}
 	fileName := uuid.Must(uuid.NewV4()).String()
 	fileEndings, err := mime.ExtensionsByType(fileType)
 	if err != nil {
 		golog.Warn("Can't read file type")
-		return ERROR(UPLOAD_PRODUCT_FAILED_INVALID_FILE)
+		return ERROR(UPLOAD_PRODUCT_FAILED_INVALID_FILE), fileName + fileEndings[0]
 	}
-	newPath := filepath.Join(uploadPath, fileName+fileEndings[0])
+	newPath := filepath.Join(UPLOAD_PATH, fileName+fileEndings[0])
 	newFile, err := os.Create(newPath)
 	if err != nil {
 		golog.Warn("Can't write file JOIN")
-		return ERROR(UPLOAD_PRODUCT_FAILED_INVALID_FILE)
+		return ERROR(UPLOAD_PRODUCT_FAILED_INVALID_FILE), fileName + fileEndings[0]
 	}
 	defer newFile.Close()
 	if _, err := newFile.Write(fileBytes); err != nil {
 		golog.Warn("Can't write file WRITE")
-		return ERROR(UPLOAD_PRODUCT_FAILED_INVALID_FILE)
+		return ERROR(UPLOAD_PRODUCT_FAILED_INVALID_FILE), fileName + fileEndings[0]
 	}
-	return response
+	return response, fileName + fileEndings[0]
 }
 
 func GetAllAvailableProducts(w http.ResponseWriter, r *http.Request) {

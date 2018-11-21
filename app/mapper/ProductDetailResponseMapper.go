@@ -18,5 +18,6 @@ func ToProductDetailResponse(product model.Product) response.ProductDetailRespon
 		UploadedTime: product.CreatedAt,
 		MinimumBorrowedTime: product.MinimumBorrowedTime,
 		MaximumBorrowedTime: product.MaximumBorrowedTime,
+		ImageUrl: model.IMAGE_URL_PREFIX + product.ImageName,
 	}
 }

@@ -6,14 +6,17 @@ import (
 
 type Product struct {
 	gorm.Model
-	TenantID uint
-	CategoryID uint
-	Sku string
-	Name string
-	Quantity uint
-	PricePerItemPerDay uint
-	Description string
+	TenantID            uint
+	CategoryID          uint
+	Sku                 string
+	Name                string
+	Quantity            uint
+	PricePerItemPerDay  uint
+	Description         string
 	MinimumBorrowedTime uint
 	MaximumBorrowedTime uint
-	ProductStatus string
+	ProductStatus       string
+	ImageName           string
 }
+
+const IMAGE_URL_PREFIX = "http://localhost:8080/images/"
