@@ -123,3 +123,32 @@ func ConfirmProductReturn(w http.ResponseWriter, r *http.Request) {
 	}
 	json.NewEncoder(w).Encode(response)
 }
+
+func ConfirmProductCancellation(w http.ResponseWriter, r *http.Request) {
+	golog.Info("/api/orders/cancellation")
+
+	db := helper.OpenDatabaseConnection()
+	defer db.Close()
+
+	var confirmProductCancellationRequest ConfirmProductCancellationRequest
+	var order model.Order
+	var response WebResponse
+
+	json.NewDecoder(r.Body).Decode(&confirmProductCancellationRequest)
+
+	if db.Where("id = ?", confirmProductCancellationRequest.OrderId).Find(&order).RecordNotFound() {
+		golog.Warn("Order with ID " + string(confirmProductCancellationRequest.OrderId) + " not found!")
+		response = ERROR(model.ORDER_NOT_FOUND)
+	} else {
+		db.Where("id = ?", confirmProductCancellationRequest.OrderId).Find(&order)
+		if order.OrderStatus == model.ON_PROCESS {
+			db.Where("id = ?", confirmProductCancellationRequest.OrderId).Find(&order)
+			db.Model(&order).Update("order_status", model.CANCELLED)
+			response = OK(nil)
+			golog.Info("Confirm product cancellation succeed")
+		} else {
+			response = ERROR(model.ORDER_CANCELLATION_FAILED)
+		}
+	}
+	json.NewEncoder(w).Encode(response)
+}
