@@ -16,8 +16,6 @@ func OpenDatabaseConnection() *gorm.DB {
 			"sslmode=disable")
 	if err != nil {
 		golog.Warn("Error connecting to DB : ", err)
-	} else {
-		golog.Info("Success connecting to DB!")
 	}
 	return db
 }
