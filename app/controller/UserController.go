@@ -1,15 +1,17 @@
 package controller
 
 import (
+	"encoding/json"
+	"log"
+	"net/http"
+
 	"../helper"
+	"../mapper"
 	. "../model"
 	. "../model/request"
 	. "../model/response"
-	"encoding/json"
 	"github.com/kataras/golog"
 	"golang.org/x/crypto/bcrypt"
-	"log"
-	"net/http"
 )
 
 func Register(w http.ResponseWriter, r *http.Request) {
@@ -28,16 +30,23 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		plainPasswordInByte := convertPlainPasswordToByte(registerRequest.Password)
 		hashedPassword := hashAndSalt(plainPasswordInByte)
 		user = User{
-			Email: registerRequest.Email,
-			Password: hashedPassword,
-			CityCodeId: registerRequest.CityCode,
-			Fullname: registerRequest.Fullname,
+			Email:       registerRequest.Email,
+			Password:    hashedPassword,
+			CityCodeId:  registerRequest.CityCode,
+			Fullname:    registerRequest.Fullname,
 			Fulladdress: registerRequest.FullAddress,
-			Phone: registerRequest.Phone,
+			Phone:       registerRequest.Phone,
 		}
-		db.Create(&user)
-		response = OK(nil)
-		golog.Info("User registration succeed")
+		if db.NewRecord(user) {
+			db.Create(&user)
+			if !db.NewRecord(user) {
+				response = OK(&user)
+				golog.Info("User registration succeed")
+			} else {
+				response = ERROR(0)
+				golog.Info("User registration failed")
+			}
+		}
 	} else {
 		golog.Warn("User with email " + registerRequest.Email + " already exists in DB")
 		response = ERROR(REGISTER_FAILED_EMAIL_ALREADY_EXISTS)
@@ -69,8 +78,10 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		userHashedPasswordFromDatabase := user.Password
 		isPasswordTrue := comparePasswords(userHashedPasswordFromDatabase, convertPlainPasswordToByte(plainPassword))
 		if isPasswordTrue {
+			db.Where("email = ?", loginRequest.Email).Find(&user)
+			userLogin := mapper.ToUserLoginDetail(user)
 			golog.Info("Login succeed")
-			response = OK(nil)
+			response = OK(userLogin)
 		} else {
 			golog.Warn("Login failed, wrong password")
 			response = ERROR(LOGIN_FAILED)
