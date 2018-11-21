@@ -75,3 +75,27 @@ func PlaceOrder(w http.ResponseWriter, r *http.Request) {
 	}
 	json.NewEncoder(w).Encode(response)
 }
+
+func ConfirmProductRetrieval(w http.ResponseWriter, r *http.Request) {
+	golog.Info("/api/orders/reception")
+
+	db := helper.OpenDatabaseConnection()
+	defer db.Close()
+
+	var confirmProductRetrievalRequest ConfirmProductRetrievalRequest
+	var order model.Order
+	var response WebResponse
+
+	json.NewDecoder(r.Body).Decode(&confirmProductRetrievalRequest)
+
+	if db.Where("id = ?", confirmProductRetrievalRequest.OrderId).Find(&order).RecordNotFound() {
+		golog.Warn("Order with ID " + string(confirmProductRetrievalRequest.OrderId) + " not found!")
+		response = ERROR(model.ORDER_NOT_FOUND)
+	} else {
+		db.Where("id = ?", confirmProductRetrievalRequest.OrderId).Find(&order)
+		db.Model(&order).Update("order_status", model.RETRIEVED)
+		response = OK(nil)
+		golog.Info("Confirm product retrieval succeed")
+	}
+	json.NewEncoder(w).Encode(response)
+}
