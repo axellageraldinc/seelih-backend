@@ -99,3 +99,27 @@ func ConfirmProductRetrieval(w http.ResponseWriter, r *http.Request) {
 	}
 	json.NewEncoder(w).Encode(response)
 }
+
+func ConfirmProductReturn(w http.ResponseWriter, r *http.Request) {
+	golog.Info("/api/orders/return")
+
+	db := helper.OpenDatabaseConnection()
+	defer db.Close()
+
+	var confirmProductReturnRequest ConfirmProductReturnRequest
+	var order model.Order
+	var response WebResponse
+
+	json.NewDecoder(r.Body).Decode(&confirmProductReturnRequest)
+
+	if db.Where("id = ?", confirmProductReturnRequest.OrderId).Find(&order).RecordNotFound() {
+		golog.Warn("Order with ID " + string(confirmProductReturnRequest.OrderId) + " not found!")
+		response = ERROR(model.ORDER_NOT_FOUND)
+	} else {
+		db.Where("id = ?", confirmProductReturnRequest.OrderId).Find(&order)
+		db.Model(&order).Update("order_status", model.DONE)
+		response = OK(nil)
+		golog.Info("Confirm product return succeed")
+	}
+	json.NewEncoder(w).Encode(response)
+}

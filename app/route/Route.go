@@ -13,6 +13,7 @@ func GetAllRoutes() *mux.Router {
 
 	routes.HandleFunc("/orders", controller.PlaceOrder).Methods("POST")
 	routes.HandleFunc("/orders/reception", controller.ConfirmProductRetrieval).Methods("POST")
+	routes.HandleFunc("/orders/return", controller.ConfirmProductReturn).Methods("POST")
 
 	return routes
 }
