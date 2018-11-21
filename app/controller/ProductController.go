@@ -23,12 +23,15 @@ const UPLOAD_PATH = "./img"
 func UploadProduct(w http.ResponseWriter, r *http.Request) {
 	golog.Info("/api/products POST")
 
+	w.Header().Set("Content-Type", "multipart/form-data")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
 	db := helper.OpenDatabaseConnection()
 	defer db.Close()
 
 	var uploadProductRequest UploadProductRequest
-	var user User
-	var category Category
+	//var user User
+	//var category Category
 	var response WebResponse
 
 	r.Body = http.MaxBytesReader(w, r.Body, maxUploadSize)
@@ -50,27 +53,27 @@ func UploadProduct(w http.ResponseWriter, r *http.Request) {
 	fileBytes, err := ioutil.ReadAll(file)
 	json.Unmarshal(fileBytes, &uploadProductRequest)
 
-	if uploadProductRequest.PricePerItemPerDay <= 0 {
-		golog.Warn("Price specified is 0 or below")
-		response = ERROR(UPLOAD_PRODUCT_FAILED_PRICE_IS_ZERO_OR_BELOW)
-		json.NewEncoder(w).Encode(response)
-		return
-	} else if uploadProductRequest.Quantity <= 0 {
-		golog.Warn("Quantity specified is 0 or below")
-		response = ERROR(UPLOAD_PRODUCT_FAILED_QUANTITY_IS_ZERO_OR_BELOW)
-		json.NewEncoder(w).Encode(response)
-		return
-	} else if db.Where("id = ?", uploadProductRequest.TenantId).Find(&user).RecordNotFound() {
-		golog.Warn("Tenant ID doesn't exist")
-		response = ERROR(UPLOAD_PRODUCT_FAILED_TENANT_ID_NOT_EXISTS)
-		json.NewEncoder(w).Encode(response)
-		return
-	} else if db.Where("id = ?", uploadProductRequest.CategoryId).Find(&category).RecordNotFound() {
-		golog.Warn("Category ID doesn't exist")
-		response = ERROR(UPLOAD_PRODUCT_FAILED_CATEGORY_ID_NOT_EXISTS)
-		json.NewEncoder(w).Encode(response)
-		return
-	}
+	//if uploadProductRequest.PricePerItemPerDay <= 0 {
+	//	golog.Warn("Price specified is 0 or below")
+	//	response = ERROR(UPLOAD_PRODUCT_FAILED_PRICE_IS_ZERO_OR_BELOW)
+	//	json.NewEncoder(w).Encode(response)
+	//	return
+	//} else if uploadProductRequest.Quantity <= 0 {
+	//	golog.Warn("Quantity specified is 0 or below")
+	//	response = ERROR(UPLOAD_PRODUCT_FAILED_QUANTITY_IS_ZERO_OR_BELOW)
+	//	json.NewEncoder(w).Encode(response)
+	//	return
+	//} else if db.Where("id = ?", uploadProductRequest.TenantId).Find(&user).RecordNotFound() {
+	//	golog.Warn("Tenant ID doesn't exist")
+	//	response = ERROR(UPLOAD_PRODUCT_FAILED_TENANT_ID_NOT_EXISTS)
+	//	json.NewEncoder(w).Encode(response)
+	//	return
+	//} else if db.Where("id = ?", uploadProductRequest.CategoryId).Find(&category).RecordNotFound() {
+	//	golog.Warn("Category ID doesn't exist")
+	//	response = ERROR(UPLOAD_PRODUCT_FAILED_CATEGORY_ID_NOT_EXISTS)
+	//	json.NewEncoder(w).Encode(response)
+	//	return
+	//}
 
 	response, fileNameAndExtension := uploadImage(w, r)
 	product := Product{
@@ -90,9 +93,6 @@ func UploadProduct(w http.ResponseWriter, r *http.Request) {
 	if response.ErrorCode == 0 {
 		golog.Info("Upload product succeed")
 	}
-
-	w.Header().Set("Content-Type", "multipart/form-data")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
 	json.NewEncoder(w).Encode(response)
 }
 
@@ -150,6 +150,8 @@ func GetAllAvailableProducts(w http.ResponseWriter, r *http.Request) {
 
 	response := OK(availableProductForRentingResponseList)
 
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	json.NewEncoder(w).Encode(response)
 }
 
@@ -173,5 +175,7 @@ func GetOneProductDetails(w http.ResponseWriter, r *http.Request) {
 		response = OK(productDetailResponse)
 	}
 
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	json.NewEncoder(w).Encode(response)
 }

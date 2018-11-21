@@ -73,6 +73,9 @@ func PlaceOrder(w http.ResponseWriter, r *http.Request) {
 			golog.Info("Order is placed successfully!")
 		}
 	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	json.NewEncoder(w).Encode(response)
 }
 
@@ -97,6 +100,9 @@ func ConfirmProductRetrieval(w http.ResponseWriter, r *http.Request) {
 		response = OK(nil)
 		golog.Info("Confirm product retrieval succeed")
 	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	json.NewEncoder(w).Encode(response)
 }
 
@@ -121,6 +127,9 @@ func ConfirmProductReturn(w http.ResponseWriter, r *http.Request) {
 		response = OK(nil)
 		golog.Info("Confirm product return succeed")
 	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	json.NewEncoder(w).Encode(response)
 }
 
@@ -150,5 +159,8 @@ func ConfirmProductCancellation(w http.ResponseWriter, r *http.Request) {
 			response = ERROR(model.ORDER_CANCELLATION_FAILED)
 		}
 	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	json.NewEncoder(w).Encode(response)
 }

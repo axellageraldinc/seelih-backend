@@ -42,6 +42,9 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		golog.Warn("User with email " + registerRequest.Email + " already exists in DB")
 		response = ERROR(REGISTER_FAILED_EMAIL_ALREADY_EXISTS)
 	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	json.NewEncoder(w).Encode(response)
 }
 
@@ -73,6 +76,9 @@ func Login(w http.ResponseWriter, r *http.Request) {
 			response = ERROR(LOGIN_FAILED)
 		}
 	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	json.NewEncoder(w).Encode(response)
 }
 
