@@ -10,7 +10,9 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/kataras/golog"
 	"github.com/satori/go.uuid"
+	"io"
 	"io/ioutil"
+	"log"
 	"mime"
 	"net/http"
 	"os"
@@ -178,4 +180,17 @@ func GetOneProductDetails(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	json.NewEncoder(w).Encode(response)
+}
+
+func GetProductImage(w http.ResponseWriter, r *http.Request) {
+	parameters := mux.Vars(r)
+	imageName := parameters["imageName"]
+
+	img, err := os.Open(UPLOAD_PATH + "/" + imageName)
+	if err != nil {
+		log.Fatal(err) // perhaps handle this nicer
+	}
+	defer img.Close()
+	w.Header().Set("Content-Type", "image/jpeg") // <-- set the content-type header
+	io.Copy(w, img)
 }

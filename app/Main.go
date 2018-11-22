@@ -1,15 +1,15 @@
 package main
 
 import (
+	"github.com/rs/cors"
 	"log"
 	"net/http"
 
-	"../app/controller"
+	//"../app/controller"
 	"../app/helper"
 	"../app/model"
 	"../app/route"
 	"github.com/jinzhu/gorm"
-	"github.com/rs/cors"
 )
 import _ "github.com/jinzhu/gorm/dialects/postgres"
 
@@ -29,8 +29,6 @@ func initiateMigration() {
 
 func initiateRoutes() {
 	routes := route.GetAllRoutes()
-	fs := http.FileServer(http.Dir(controller.UPLOAD_PATH))
-	http.Handle("/img/", http.StripPrefix("/img", fs))
 	http.Handle("/", routes)
 	handler := cors.Default().Handler(routes)
 	log.Fatal(http.ListenAndServe(":8080", handler))

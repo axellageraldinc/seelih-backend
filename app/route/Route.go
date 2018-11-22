@@ -18,6 +18,7 @@ func GetAllRoutes() *mux.Router {
 	routes.HandleFunc("/products", controller.UploadProduct).Methods("POST")
 	routes.HandleFunc("/products", controller.GetAllAvailableProducts).Methods("GET")
 	routes.HandleFunc("/products/{productId}", controller.GetOneProductDetails).Methods("GET")
+	routes.HandleFunc("/products/img/{imageName}", controller.GetProductImage).Methods("GET")
 
 	routes.HandleFunc("/orders", controller.PlaceOrder).Methods("POST")
 	routes.HandleFunc("/orders/reception", controller.ConfirmProductRetrieval).Methods("POST")
