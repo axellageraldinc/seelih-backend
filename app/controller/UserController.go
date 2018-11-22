@@ -41,7 +41,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		if db.NewRecord(user) {
 			db.Create(&user)
 			if !db.NewRecord(user) {
-				response = OK(&user)
+				response = OK(nil)
 				golog.Info("User registration succeed")
 			} else {
 				response = ERROR(REGISTER_FAILED_WONT_SAVE_TO_DATABASE)
