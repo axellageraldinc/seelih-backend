@@ -44,8 +44,8 @@ func Register(w http.ResponseWriter, r *http.Request) {
 				response = OK(&user)
 				golog.Info("User registration succeed")
 			} else {
-				response = ERROR(0)
-				golog.Info("User registration failed")
+				response = ERROR(REGISTER_FAILED_WONT_SAVE_TO_DATABASE)
+				golog.Warn("User registration failed")
 			}
 		}
 	} else {
