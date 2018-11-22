@@ -19,4 +19,4 @@ type Product struct {
 	ImageName           string
 }
 
-const IMAGE_URL_PREFIX = "http://10.72.7.20:8080/img/"
+const IMAGE_URL_PREFIX = "http://localhost:8080/img/"
