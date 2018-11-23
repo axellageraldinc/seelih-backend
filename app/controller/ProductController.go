@@ -1,15 +1,7 @@
 package controller
 
 import (
-	"../helper"
-	"../mapper"
-	. "../model"
-	. "../model/request"
-	. "../model/response"
 	"encoding/json"
-	"github.com/gorilla/mux"
-	"github.com/kataras/golog"
-	"github.com/satori/go.uuid"
 	"io"
 	"io/ioutil"
 	"log"
@@ -17,6 +9,15 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+
+	"../helper"
+	"../mapper"
+	. "../model"
+	. "../model/request"
+	. "../model/response"
+	"github.com/gorilla/mux"
+	"github.com/kataras/golog"
+	"github.com/satori/go.uuid"
 )
 
 const maxUploadSize = 2 * 1024 * 1024 // 2 MB
@@ -44,16 +45,16 @@ func UploadProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	file, _, err := r.FormFile("product_data")
-	if err != nil {
+	productData := r.FormValue("product_data")
+	if productData == "" {
 		golog.Warn("Invalid file product_data")
 		response = ERROR(UPLOAD_PRODUCT_FAILED_INVALID_FILE)
 		json.NewEncoder(w).Encode(response)
 		return
 	}
-	defer file.Close()
-	fileBytes, err := ioutil.ReadAll(file)
-	json.Unmarshal(fileBytes, &uploadProductRequest)
+	golog.Info(productData)
+	productDataByte := []byte(productData)
+	json.Unmarshal(productDataByte, &uploadProductRequest)
 
 	if uploadProductRequest.PricePerItemPerDay <= 0 {
 		golog.Warn("Price specified is 0 or below")

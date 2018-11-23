@@ -13,6 +13,8 @@ func GetAllRoutes() *mux.Router {
 	routes.HandleFunc("/users/{userId}", controller.GetUserData).Methods("GET")
 	routes.HandleFunc("/users/{userId}/orders", controller.GetAllOrders).Methods("GET")
 
+	routes.HandleFunc("/cities", controller.GetAllCities).Methods("GET")
+
 	routes.HandleFunc("/categories", controller.GetAllCategories).Methods("GET")
 
 	routes.HandleFunc("/products", controller.UploadProduct).Methods("POST")
@@ -21,7 +23,7 @@ func GetAllRoutes() *mux.Router {
 	routes.HandleFunc("/products/img/{imageName}", controller.GetProductImage).Methods("GET")
 
 	routes.HandleFunc("/orders", controller.PlaceOrder).Methods("POST")
-	routes.HandleFunc("/orders/reception", controller.ConfirmProductRetrieval).Methods("POST")
+	routes.HandleFunc("/orders/retrieve", controller.ConfirmProductRetrieval).Methods("POST")
 	routes.HandleFunc("/orders/return", controller.ConfirmProductReturn).Methods("POST")
 	routes.HandleFunc("/orders/cancellation", controller.ConfirmProductCancellation).Methods("POST")
 
