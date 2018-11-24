@@ -101,7 +101,7 @@ func GetAllOrders(w http.ResponseWriter, r *http.Request) {
 	} else {
 		rows, err := db.Raw("SELECT orders.id, products.name AS product_name, products.image_name AS image_url, orders.total_price, orders.order_status, orders.return_time "+
 			"FROM orders, products "+
-			"WHERE orders.borrower_id = ?", userId).Rows()
+			"WHERE orders.borrower_id = ? AND orders.product_id = products.id", userId).Rows()
 		defer rows.Close()
 		if err != nil {
 			golog.Warn("Error raw SQL selecting all orders " + err.Error())
