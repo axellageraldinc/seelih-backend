@@ -6,7 +6,7 @@ import (
 
 	"github.com/rs/cors"
 
-	//"../app/controller"
+	"../app/controller"
 	"../app/helper"
 	"../app/model"
 	"../app/route"
@@ -36,6 +36,38 @@ func initiateRoutes() {
 }
 
 func insertDefaultData(db *gorm.DB) {
+	// data for cities and categories are in the dummy_default_data.sql file
+
+	// USER'S DEFAULT DATA
+	user1 := model.User{
+		Phone: "08123123123",
+		Fulladdress: "Yogyakarta",
+		Fullname: "Axellageraldinc Adryamarthanino",
+		CityCodeId: 123,
+		Password: controller.HashAndSalt(controller.ConvertPlainPasswordToByte("axell123")),
+		Email: "axell@gmail.com",
+	}
+	user2 := model.User{
+		Phone: "08456456456",
+		Fulladdress: "Lamongan",
+		Fullname: "Moh Azzum Jordhan Wiratama",
+		CityCodeId: 111,
+		Password: controller.HashAndSalt(controller.ConvertPlainPasswordToByte("azzum123")),
+		Email: "azzum@gmail.com",
+	}
+	user3 := model.User{
+		Phone: "08678678678",
+		Fulladdress: "Boyolali",
+		Fullname: "Almantera Tiantana Al Faruqi",
+		CityCodeId: 222,
+		Password: controller.HashAndSalt(controller.ConvertPlainPasswordToByte("alman123")),
+		Email: "alman@gmail.com",
+	}
+	db.Create(&user1)
+	db.Create(&user2)
+	db.Create(&user3)
+
+	// PRODUCT'S DEFAULT DATA
 	product1 := model.Product{
 		TenantID:            1,
 		CategoryID:          4,

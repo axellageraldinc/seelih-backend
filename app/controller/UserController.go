@@ -28,8 +28,8 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	json.NewDecoder(r.Body).Decode(&registerRequest)
 
 	if db.Where("email = ?", registerRequest.Email).Find(&user).RecordNotFound() {
-		plainPasswordInByte := convertPlainPasswordToByte(registerRequest.Password)
-		hashedPassword := hashAndSalt(plainPasswordInByte)
+		plainPasswordInByte := ConvertPlainPasswordToByte(registerRequest.Password)
+		hashedPassword := HashAndSalt(plainPasswordInByte)
 		user = User{
 			Email:       registerRequest.Email,
 			Password:    hashedPassword,
@@ -77,7 +77,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		plainPassword := loginRequest.Password
 		db.Where("email = ?", loginRequest.Email).Find(&user)
 		userHashedPasswordFromDatabase := user.Password
-		isPasswordTrue := comparePasswords(userHashedPasswordFromDatabase, convertPlainPasswordToByte(plainPassword))
+		isPasswordTrue := comparePasswords(userHashedPasswordFromDatabase, ConvertPlainPasswordToByte(plainPassword))
 		if isPasswordTrue {
 			db.Where("email = ?", loginRequest.Email).Find(&user)
 			userLogin := mapper.ToUserLoginDetail(user)
@@ -121,7 +121,7 @@ func GetUserData(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
-func hashAndSalt(bytePlainPassword []byte) string {
+func HashAndSalt(bytePlainPassword []byte) string {
 	// Use GenerateFromPassword to hash & salt bytePlainPassword
 	// MinCost is just an integer constant provided by the bcrypt
 	// package along with DefaultCost & MaxCost.
@@ -136,7 +136,7 @@ func hashAndSalt(bytePlainPassword []byte) string {
 	return string(hash)
 }
 
-func convertPlainPasswordToByte(plainPassword string) []byte {
+func ConvertPlainPasswordToByte(plainPassword string) []byte {
 	// Return the users input as a byte slice which will save us
 	// from having to do this conversion later on
 	return []byte(plainPassword)
