@@ -101,7 +101,7 @@ func GetAllOrders(w http.ResponseWriter, r *http.Request) {
 	} else {
 		rows, err := db.Raw("SELECT orders.id, products.name AS product_name, products.image_name AS image_url, orders.total_price, orders.order_status, orders.return_time "+
 			"FROM orders, products "+
-			"WHERE (orders.borrower_id = ? OR products.tenant_id = ?) AND orders.borrower_id = products.tenant_id", userId, userId).Rows()
+			"WHERE orders.borrower_id = ?", userId).Rows()
 		defer rows.Close()
 		if err != nil {
 			golog.Warn("Error raw SQL selecting all orders " + err.Error())
@@ -121,7 +121,7 @@ func GetAllOrders(w http.ResponseWriter, r *http.Request) {
 }
 
 func ConfirmProductRetrieval(w http.ResponseWriter, r *http.Request) {
-	golog.Info("/api/orders/reception")
+	golog.Info("/api/orders/retrieve")
 
 	db := helper.OpenDatabaseConnection()
 	defer db.Close()
