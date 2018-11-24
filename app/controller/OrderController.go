@@ -182,6 +182,7 @@ func ConfirmProductCancellation(w http.ResponseWriter, r *http.Request) {
 
 	var confirmProductCancellationRequest ConfirmProductCancellationRequest
 	var order model.Order
+	var product model.Product
 	var response WebResponse
 
 	json.NewDecoder(r.Body).Decode(&confirmProductCancellationRequest)
@@ -191,9 +192,11 @@ func ConfirmProductCancellation(w http.ResponseWriter, r *http.Request) {
 		response = ERROR(model.ORDER_NOT_FOUND)
 	} else {
 		db.Where("id = ?", confirmProductCancellationRequest.OrderId).Find(&order)
+		db.Where("id = ?", order.ProductID).Find(&product)
 		if order.OrderStatus == model.ON_PROCESS {
 			db.Where("id = ?", confirmProductCancellationRequest.OrderId).Find(&order)
 			db.Model(&order).Update("order_status", model.CANCELLED)
+			db.Model(&product).Update("product_status", model.OPENED)
 			response = OK(nil)
 			golog.Info("Confirm product cancellation succeed")
 		} else {
