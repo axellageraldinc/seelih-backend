@@ -183,6 +183,33 @@ func GetOneProductDetails(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
+func GetUserUploadedProducts(w http.ResponseWriter, r *http.Request) {
+	golog.Info("/api/users/{userId}/products")
+	
+	db := helper.OpenDatabaseConnection()
+	defer db.Close()
+
+	parameters := mux.Vars(r)
+	userId := parameters["userId"]
+
+	var user User
+	var products []Product
+	var response WebResponse
+
+	if db.Where("id = ?", userId).Find(&user).RecordNotFound() {
+		golog.Warn("User with ID " + string(userId) + " not found")
+		response = ERROR(GET_USER_UPLOADED_PRODUCTS_FAILED_USER_ID_NOT_FOUND)
+	} else {
+		db.Where("tenant_id = ?", userId).Find(&products)
+		uploadedProductResponseList := mapper.ToUploadedProductResponseList(products)
+		response = OK(uploadedProductResponseList)
+		golog.Info("Getting user's uploaded products succeed")
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	json.NewEncoder(w).Encode(response)
+}
+
 func GetProductImage(w http.ResponseWriter, r *http.Request) {
 	parameters := mux.Vars(r)
 	imageName := parameters["imageName"]
