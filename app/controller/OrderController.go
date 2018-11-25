@@ -1,6 +1,7 @@
 package controller
 
 import (
+	. "../helper"
 	. "../model/request"
 	. "../model/response"
 	. "../service"
@@ -30,8 +31,8 @@ func (orderController *OrderController) PlaceOrderHandler(w http.ResponseWriter,
 		response = ERROR(errorCode)
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set(CONTENT_TYPE, APPLICATION_JSON)
+	w.Header().Set(ACCESS_CONTROL_ALLOW_ORIGIN, ALL)
 	json.NewEncoder(w).Encode(response)
 }
 
@@ -49,8 +50,8 @@ func (orderController *OrderController) GetAllOrdersHandler(w http.ResponseWrite
 	} else {
 		response = ERROR(errorCode)
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set(CONTENT_TYPE, APPLICATION_JSON)
+	w.Header().Set(ACCESS_CONTROL_ALLOW_ORIGIN, ALL)
 	json.NewEncoder(w).Encode(response)
 }
 
@@ -69,8 +70,8 @@ func (orderController *OrderController) ConfirmProductRetrievalHandler(w http.Re
 		response = ERROR(errorCode)
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set(CONTENT_TYPE, APPLICATION_JSON)
+	w.Header().Set(ACCESS_CONTROL_ALLOW_ORIGIN, ALL)
 	json.NewEncoder(w).Encode(response)
 }
 
@@ -89,8 +90,8 @@ func (orderController *OrderController) ConfirmProductReturnHandler(w http.Respo
 		response = ERROR(errorCode)
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set(CONTENT_TYPE, APPLICATION_JSON)
+	w.Header().Set(ACCESS_CONTROL_ALLOW_ORIGIN, ALL)
 	json.NewEncoder(w).Encode(response)
 }
 
@@ -109,7 +110,7 @@ func (orderController *OrderController) ConfirmProductCancellationHandler(w http
 		response = ERROR(errorCode)
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set(CONTENT_TYPE, APPLICATION_JSON)
+	w.Header().Set(ACCESS_CONTROL_ALLOW_ORIGIN, ALL)
 	json.NewEncoder(w).Encode(response)
 }

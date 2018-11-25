@@ -1,6 +1,7 @@
 package controller
 
 import (
+	. "../helper"
 	. "../mapper"
 	. "../model/response"
 	. "../service"
@@ -16,7 +17,7 @@ type CategoryController struct {
 
 func (categoryController *CategoryController) FindAllCategoriesHandler(w http.ResponseWriter, r *http.Request) {
 	golog.Info("/api/categories")
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set(CONTENT_TYPE, APPLICATION_JSON)
+	w.Header().Set(ACCESS_CONTROL_ALLOW_ORIGIN, ALL)
 	json.NewEncoder(w).Encode(OK(categoryController.ToCategoryResponseList(categoryController.FindAll())))
 }

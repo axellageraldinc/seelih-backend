@@ -1,6 +1,7 @@
 package controller
 
 import (
+	. "../helper"
 	"encoding/json"
 	"github.com/gorilla/mux"
 	"net/http"
@@ -33,8 +34,8 @@ func (userController *UserController) RegisterHandler(w http.ResponseWriter, r *
 		response = ERROR(errorCode)
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set(CONTENT_TYPE, APPLICATION_JSON)
+	w.Header().Set(ACCESS_CONTROL_ALLOW_ORIGIN, ALL)
 	json.NewEncoder(w).Encode(response)
 }
 
@@ -53,8 +54,8 @@ func (userController *UserController) LoginHandler(w http.ResponseWriter, r *htt
 		response = ERROR(errorCode)
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set(CONTENT_TYPE, APPLICATION_JSON)
+	w.Header().Set(ACCESS_CONTROL_ALLOW_ORIGIN, ALL)
 	json.NewEncoder(w).Encode(response)
 }
 
@@ -74,7 +75,7 @@ func (userController *UserController) GetUserDataHandler(w http.ResponseWriter, 
 		response = ERROR(errorCode)
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set(CONTENT_TYPE, APPLICATION_JSON)
+	w.Header().Set(ACCESS_CONTROL_ALLOW_ORIGIN, ALL)
 	json.NewEncoder(w).Encode(response)
 }

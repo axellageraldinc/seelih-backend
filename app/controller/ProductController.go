@@ -1,6 +1,7 @@
 package controller
 
 import (
+	. "../helper"
 	. "../mapper"
 	. "../model"
 	. "../model/response"
@@ -25,8 +26,8 @@ type ProductController struct {
 func (productController *ProductController) UploadProductHandler(w http.ResponseWriter, r *http.Request) {
 	golog.Info("/api/products POST")
 
-	w.Header().Set("Content-Type", "multipart/form-data")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set(CONTENT_TYPE, MULTIPART_FORM_DATA)
+	w.Header().Set(ACCESS_CONTROL_ALLOW_ORIGIN, ALL)
 
 	var response WebResponse
 
@@ -54,8 +55,8 @@ func (productController *ProductController) UploadProductHandler(w http.Response
 func (productController *ProductController) GetAllAvailableProductsHandler(w http.ResponseWriter, r *http.Request) {
 	golog.Info("/api/products GET")
 
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set(CONTENT_TYPE, APPLICATION_JSON)
+	w.Header().Set(ACCESS_CONTROL_ALLOW_ORIGIN, ALL)
 	json.NewEncoder(w).Encode(productController.ToAvailableProductForRentingResponseList(productController.GetAllAvailableProducts()))
 }
 
@@ -74,8 +75,8 @@ func (productController *ProductController) GetOneProductDetailsHandler(w http.R
 		response = ERROR(errorCode)
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set(CONTENT_TYPE, APPLICATION_JSON)
+	w.Header().Set(ACCESS_CONTROL_ALLOW_ORIGIN, ALL)
 	json.NewEncoder(w).Encode(response)
 }
 
@@ -95,8 +96,8 @@ func (productController *ProductController) GetUserUploadedProductsHandler(w htt
 		response = ERROR(errorCode)
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set(CONTENT_TYPE, APPLICATION_JSON)
+	w.Header().Set(ACCESS_CONTROL_ALLOW_ORIGIN, ALL)
 	json.NewEncoder(w).Encode(response)
 }
 
@@ -109,6 +110,6 @@ func (productController *ProductController) GetProductImageHandler(w http.Respon
 		log.Fatal(err) // perhaps handle this nicer
 	}
 	defer img.Close()
-	w.Header().Set("Content-Type", "image/jpeg") // <-- set the content-type header
+	w.Header().Set(CONTENT_TYPE, IMAGE_JPEG) // <-- set the content-type header
 	io.Copy(w, img)
 }

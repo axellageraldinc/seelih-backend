@@ -13,10 +13,8 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	. "../helper"
 )
-
-const MAX_FILE_UPLOAD_SIZE = 2 * 1024 * 1024 // 2 MB
-const UPLOAD_PATH = "./img"
 
 type IProductService interface {
 	UploadProduct(productData string, file multipart.File, err error) uint

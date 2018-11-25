@@ -1,6 +1,7 @@
 package controller
 
 import (
+	. "../helper"
 	"encoding/json"
 	"net/http"
 
@@ -17,7 +18,7 @@ type CityController struct {
 
 func (cityController *CityController) GetAllCitiesHandler(w http.ResponseWriter, r *http.Request) {
 	golog.Info("/api/cities")
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set(CONTENT_TYPE, APPLICATION_JSON)
+	w.Header().Set(ACCESS_CONTROL_ALLOW_ORIGIN, ALL)
 	json.NewEncoder(w).Encode(OK(cityController.ToCityResponseList(cityController.FindAll())))
 }

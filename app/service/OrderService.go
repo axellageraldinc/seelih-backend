@@ -26,7 +26,6 @@ type OrderService struct {
 func (orderService *OrderService) PlaceOrder(request PlaceOrderRequest) uint {
 	var errorCode uint
 	if !orderService.DoesProductIdExist(int(request.ProductId)) {
-		golog.Warn("Product with ID " + string(request.ProductId) + " not found!")
 		errorCode = ORDER_FAILED_PRODUCT_ID_NOT_FOUND
 	} else {
 		product := orderService.FindProductById(int(request.ProductId))
@@ -50,7 +49,7 @@ func (orderService *OrderService) PlaceOrder(request PlaceOrderRequest) uint {
 			errorCode = ORDER_FAILED_BORROWER_ID_NOT_FOUND
 		} else {
 			totalPrice := (product.PricePerItemPerDay * request.Quantity) * request.Duration
-			remainingProductQuantity := request.Quantity - request.Quantity
+			remainingProductQuantity := product.Quantity - request.Quantity
 
 			if remainingProductQuantity != 0 {
 				orderService.UpdateProductQuantity(product, remainingProductQuantity)
@@ -82,7 +81,6 @@ func (orderService *OrderService) GetAllOrders(userId int) (orders []OrderRespon
 
 func (orderService *OrderService) ConfirmProductRetrieval(request ConfirmProductRetrievalRequest) uint {
 	if !orderService.DoesOrderIdExist(int(request.OrderId)) {
-		golog.Warn("Order with ID " + string(request.OrderId) + " not found!")
 		return ORDER_NOT_FOUND
 	} else {
 		var order = orderService.FindOrderById(int(request.OrderId))
@@ -94,7 +92,6 @@ func (orderService *OrderService) ConfirmProductRetrieval(request ConfirmProduct
 
 func (orderService *OrderService) ConfirmProductReturn(request ConfirmProductReturnRequest) uint {
 	if !orderService.DoesOrderIdExist(int(request.OrderId)) {
-		golog.Warn("Order with ID " + string(request.OrderId) + " not found!")
 		return ORDER_NOT_FOUND
 	} else {
 		var order = orderService.FindOrderById(int(request.OrderId))
@@ -106,7 +103,6 @@ func (orderService *OrderService) ConfirmProductReturn(request ConfirmProductRet
 
 func (orderService *OrderService) ConfirmProductCancellation(request ConfirmProductCancellationRequest) uint {
 	if !orderService.DoesOrderIdExist(int(request.OrderId)) {
-		golog.Warn("Order with ID " + string(request.OrderId) + " not found!")
 		return ORDER_NOT_FOUND
 	} else {
 		var order = orderService.FindOrderById(int(request.OrderId))
