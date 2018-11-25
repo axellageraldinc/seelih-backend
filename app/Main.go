@@ -6,10 +6,10 @@ import (
 
 	"github.com/rs/cors"
 
-	"../app/controller"
 	"../app/helper"
 	"../app/model"
 	"../app/route"
+	. "../app/service"
 	"github.com/jinzhu/gorm"
 )
 import _ "github.com/jinzhu/gorm/dialects/postgres"
@@ -20,7 +20,8 @@ func main() {
 }
 
 func initiateMigration() {
-	db := helper.OpenDatabaseConnection()
+	dbHelper := &helper.DatabaseConnectionHelper{}
+	db := dbHelper.OpenDatabaseConnection()
 	defer db.Close()
 
 	// db.DropTable(&model.Category{}, &model.City{}, &model.User{}, &model.Product{}, &model.Order{})   // Uncomment this code if there's a column deletion in DB
@@ -44,7 +45,7 @@ func insertDefaultData(db *gorm.DB) {
 		Fulladdress: "Yogyakarta",
 		Fullname: "Axellageraldinc Adryamarthanino",
 		CityCodeId: 123,
-		Password: controller.HashAndSalt(controller.ConvertPlainPasswordToByte("axell123")),
+		Password: HashAndSalt(ConvertPlainPasswordToByte("axell123")),
 		Email: "axell@gmail.com",
 	}
 	user2 := model.User{
@@ -52,7 +53,7 @@ func insertDefaultData(db *gorm.DB) {
 		Fulladdress: "Lamongan",
 		Fullname: "Moh Azzum Jordhan Wiratama",
 		CityCodeId: 111,
-		Password: controller.HashAndSalt(controller.ConvertPlainPasswordToByte("azzum123")),
+		Password: HashAndSalt(ConvertPlainPasswordToByte("azzum123")),
 		Email: "azzum@gmail.com",
 	}
 	user3 := model.User{
@@ -60,7 +61,7 @@ func insertDefaultData(db *gorm.DB) {
 		Fulladdress: "Boyolali",
 		Fullname: "Almantera Tiantana Al Faruqi",
 		CityCodeId: 222,
-		Password: controller.HashAndSalt(controller.ConvertPlainPasswordToByte("alman123")),
+		Password: HashAndSalt(ConvertPlainPasswordToByte("alman123")),
 		Email: "alman@gmail.com",
 	}
 	db.Create(&user1)

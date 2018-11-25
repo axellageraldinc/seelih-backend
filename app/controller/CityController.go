@@ -4,22 +4,20 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"../helper"
-	"../mapper"
-	"../model"
-	"../model/response"
+	. "../mapper"
+	. "../model/response"
+	. "../service"
 	"github.com/kataras/golog"
 )
 
-func GetAllCities(w http.ResponseWriter, r *http.Request) {
-	golog.Info("/api/city GET")
+type CityController struct {
+	ICityService
+	ICityResponseMapper
+}
 
-	db := helper.OpenDatabaseConnection()
-	defer db.Close()
-
-	var cities []model.City
-
-	db.Find(&cities)
-
-	json.NewEncoder(w).Encode(response.OK(mapper.ToCityResponseList(cities)))
+func (cityController *CityController) GetAllCitiesHandler(w http.ResponseWriter, r *http.Request) {
+	golog.Info("/api/cities")
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	json.NewEncoder(w).Encode(OK(cityController.ToCityResponseList(cityController.FindAll())))
 }

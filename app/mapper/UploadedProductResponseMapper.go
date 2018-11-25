@@ -5,7 +5,13 @@ import (
 	. "../model/response"
 )
 
-func ToUploadedProductResponseList(products []Product) []UploadedProductResponse {
+type IUploadedProductResponseMapper interface {
+	ToUploadedProductResponseList(products []Product) []UploadedProductResponse
+}
+
+type UploadedProductResponseMapper struct {}
+
+func (uploadedProductResponseMapper *UploadedProductResponseMapper) ToUploadedProductResponseList(products []Product) []UploadedProductResponse {
 	var uploadedProductResponseList []UploadedProductResponse
 	for index := range products {
 		uploadedProductResponse := UploadedProductResponse{
