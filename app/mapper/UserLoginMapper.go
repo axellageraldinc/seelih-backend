@@ -5,7 +5,13 @@ import (
 	. "../model/response"
 )
 
-func ToUserLoginDetail(user User) UserResponse {
+type IUserLoginMapper interface {
+	ToUserLoginDetail(User) UserResponse
+}
+
+type UserLoginMapper struct {}
+
+func (userLoginMapper *UserLoginMapper) ToUserLoginDetail(user User) UserResponse {
 	return UserResponse{
 		Id:          user.ID,
 		Fullname:    user.Fullname,

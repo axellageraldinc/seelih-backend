@@ -1,14 +1,20 @@
 package mapper
 
 import (
-	"../model"
-	"../model/response"
+	. "../model"
+	. "../model/response"
 )
 
-func ToCategoryResponseList(categories []model.Category) []response.CategoryResponse {
-	var categoryResponseList []response.CategoryResponse
+type ICategoryResponseMapper interface {
+	ToCategoryResponseList([]Category) []CategoryResponse
+}
+
+type CategoryResponseMapper struct {}
+
+func (categoryResponseMapper *CategoryResponseMapper) ToCategoryResponseList(categories []Category) []CategoryResponse {
+	var categoryResponseList []CategoryResponse
 	for index := range categories {
-		availableProductForRentingResponse := response.CategoryResponse{
+		availableProductForRentingResponse := CategoryResponse{
 			Id:                 categories[index].ID,
 			Name:               categories[index].Name,
 		}

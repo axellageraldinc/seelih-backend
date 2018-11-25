@@ -1,14 +1,20 @@
 package mapper
 
 import (
-	"../model"
-	"../model/response"
+	. "../model"
+	. "../model/response"
 )
 
-func ToCityResponseList(cities []model.City) []response.CityResponse {
-	var cityResponseList []response.CityResponse
+type ICityResponseMapper interface {
+	ToCityResponseList([]City) []CityResponse
+}
+
+type CityResponseMapper struct {}
+
+func (cityResponseMapper *CityResponseMapper) ToCityResponseList(cities []City) []CityResponse {
+	var cityResponseList []CityResponse
 	for index := range cities {
-		cityResponse := response.CityResponse{
+		cityResponse := CityResponse{
 			Id:   cities[index].ID,
 			Name: cities[index].Name,
 		}

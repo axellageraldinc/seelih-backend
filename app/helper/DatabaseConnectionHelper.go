@@ -5,7 +5,13 @@ import (
 	"github.com/kataras/golog"
 )
 
-func OpenDatabaseConnection() *gorm.DB {
+type IDatabaseConnectionHelper interface {
+	OpenDatabaseConnection() *gorm.DB
+}
+
+type DatabaseConnectionHelper struct {}
+
+func (databaseConnectionHelper *DatabaseConnectionHelper) OpenDatabaseConnection() *gorm.DB {
 	db, err := gorm.Open(
 		"postgres",
 		"host = localhost " +

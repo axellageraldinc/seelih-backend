@@ -5,7 +5,13 @@ import (
 	. "../model/response"
 )
 
-func ToAvailableProductForRentingResponseList(products []Product) []AvailableProductForRentingResponse {
+type IAvailableProductForRentingResponseMapper interface {
+	ToAvailableProductForRentingResponseList(products []Product) []AvailableProductForRentingResponse
+}
+
+type AvailableProductForRentingResponseMapper struct {}
+
+func (availableProductForRentingResponseMapper *AvailableProductForRentingResponseMapper) ToAvailableProductForRentingResponseList(products []Product) []AvailableProductForRentingResponse {
 	var availableProductForRentingResponseList []AvailableProductForRentingResponse
 	for index := range products {
 		availableProductForRentingResponse := AvailableProductForRentingResponse{

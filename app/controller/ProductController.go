@@ -1,44 +1,36 @@
 package controller
 
 import (
-	"encoding/json"
-	"io"
-	"io/ioutil"
-	"log"
-	"mime"
-	"net/http"
-	"os"
-	"path/filepath"
-
-	"../helper"
-	"../mapper"
+	. "../mapper"
 	. "../model"
-	. "../model/request"
 	. "../model/response"
+	. "../service"
+	"encoding/json"
 	"github.com/gorilla/mux"
 	"github.com/kataras/golog"
-	"github.com/satori/go.uuid"
+	"io"
+	"log"
+	"net/http"
+	"os"
+	"strconv"
 )
 
-const maxUploadSize = 2 * 1024 * 1024 // 2 MB
-const UPLOAD_PATH = "./img"
+type ProductController struct {
+	IProductService
+	IAvailableProductForRentingResponseMapper
+	IProductDetailResponseMapper
+}
 
-func UploadProduct(w http.ResponseWriter, r *http.Request) {
+func (productController *ProductController) UploadProductHandler(w http.ResponseWriter, r *http.Request) {
 	golog.Info("/api/products POST")
 
 	w.Header().Set("Content-Type", "multipart/form-data")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
-	db := helper.OpenDatabaseConnection()
-	defer db.Close()
-
-	var uploadProductRequest UploadProductRequest
-	var user User
-	var category Category
 	var response WebResponse
 
-	r.Body = http.MaxBytesReader(w, r.Body, maxUploadSize)
-	if err := r.ParseMultipartForm(maxUploadSize); err != nil {
+	r.Body = http.MaxBytesReader(w, r.Body, MAX_FILE_UPLOAD_SIZE)
+	if err := r.ParseMultipartForm(MAX_FILE_UPLOAD_SIZE); err != nil {
 		golog.Warn("File too big")
 		response = ERROR(UPLOAD_PRODUCT_FAILED_FILE_TOO_BIG)
 		json.NewEncoder(w).Encode(response)
@@ -46,136 +38,39 @@ func UploadProduct(w http.ResponseWriter, r *http.Request) {
 	}
 
 	productData := r.FormValue("product_data")
-	if productData == "" {
-		golog.Warn("Invalid file product_data")
-		response = ERROR(UPLOAD_PRODUCT_FAILED_INVALID_FILE)
-		json.NewEncoder(w).Encode(response)
-		return
-	}
-	golog.Info(productData)
-	productDataByte := []byte(productData)
-	json.Unmarshal(productDataByte, &uploadProductRequest)
+	image, _, err := r.FormFile("image")
 
-	if uploadProductRequest.PricePerItemPerDay <= 0 {
-		golog.Warn("Price specified is 0 or below")
-		response = ERROR(UPLOAD_PRODUCT_FAILED_PRICE_IS_ZERO_OR_BELOW)
-		json.NewEncoder(w).Encode(response)
-		return
-	} else if uploadProductRequest.Quantity <= 0 {
-		golog.Warn("Quantity specified is 0 or below")
-		response = ERROR(UPLOAD_PRODUCT_FAILED_QUANTITY_IS_ZERO_OR_BELOW)
-		json.NewEncoder(w).Encode(response)
-		return
-	} else if db.Where("id = ?", uploadProductRequest.TenantId).Find(&user).RecordNotFound() {
-		golog.Warn("Tenant ID doesn't exist")
-		response = ERROR(UPLOAD_PRODUCT_FAILED_TENANT_ID_NOT_EXISTS)
-		json.NewEncoder(w).Encode(response)
-		return
-	} else if db.Where("id = ?", uploadProductRequest.CategoryId).Find(&category).RecordNotFound() {
-		golog.Warn("Category ID doesn't exist")
-		response = ERROR(UPLOAD_PRODUCT_FAILED_CATEGORY_ID_NOT_EXISTS)
-		json.NewEncoder(w).Encode(response)
-		return
+	errorCode := productController.UploadProduct(productData, image, err)
+	if errorCode == 0 {
+		response = OK(nil)
+	} else {
+		response = ERROR(errorCode)
 	}
 
-	response, fileNameAndExtension := uploadImage(w, r)
-	product := Product{
-		TenantID:            uploadProductRequest.TenantId,
-		CategoryID:          uploadProductRequest.CategoryId,
-		Quantity:            uploadProductRequest.Quantity,
-		Name:                uploadProductRequest.Name,
-		Sku:                 uploadProductRequest.Sku,
-		Description:         uploadProductRequest.Description,
-		PricePerItemPerDay:  uploadProductRequest.PricePerItemPerDay,
-		MinimumBorrowedTime: uploadProductRequest.MinimumBorrowedTime,
-		MaximumBorrowedTime: uploadProductRequest.MaximumBorrowedTime,
-		ProductStatus:       OPENED,
-		ImageName:           fileNameAndExtension,
-	}
-	db.Create(&product)
-	if response.ErrorCode == 0 {
-		golog.Info("Upload product succeed")
-	}
 	json.NewEncoder(w).Encode(response)
 }
 
-func uploadImage(w http.ResponseWriter, r *http.Request) (webResponse WebResponse, fileNameAndExtension string) {
-	var response = OK(nil)
-	file, _, err := r.FormFile("image")
-	if err != nil {
-		golog.Warn("Invalid file image FormFile")
-		return ERROR(UPLOAD_PRODUCT_FAILED_INVALID_FILE), ""
-	}
-	defer file.Close()
-	fileBytes, err := ioutil.ReadAll(file)
-	if err != nil {
-		golog.Warn("Invalid file image ReadAll")
-		return ERROR(UPLOAD_PRODUCT_FAILED_INVALID_FILE), ""
-	}
-	fileType := http.DetectContentType(fileBytes)
-	if fileType != "image/jpeg" &&
-		fileType != "image/jpg" &&
-		fileType != "image/png" {
-		golog.Warn("Invalid file type. Only accepts jpeg, jpg, and png")
-		return ERROR(UPLOAD_PRODUCT_FAILED_INVALID_FILE), ""
-	}
-	fileName := uuid.Must(uuid.NewV4()).String()
-	fileEndings, err := mime.ExtensionsByType(fileType)
-	if err != nil {
-		golog.Warn("Can't read file type")
-		return ERROR(UPLOAD_PRODUCT_FAILED_INVALID_FILE), fileName + fileEndings[0]
-	}
-	newPath := filepath.Join(UPLOAD_PATH, fileName+fileEndings[0])
-	newFile, err := os.Create(newPath)
-	if err != nil {
-		golog.Warn("Can't write file JOIN")
-		return ERROR(UPLOAD_PRODUCT_FAILED_INVALID_FILE), fileName + fileEndings[0]
-	}
-	defer newFile.Close()
-	if _, err := newFile.Write(fileBytes); err != nil {
-		golog.Warn("Can't write file WRITE")
-		return ERROR(UPLOAD_PRODUCT_FAILED_INVALID_FILE), fileName + fileEndings[0]
-	}
-	return response, fileName + fileEndings[0]
-}
-
-func GetAllAvailableProducts(w http.ResponseWriter, r *http.Request) {
+func (productController *ProductController) GetAllAvailableProductsHandler(w http.ResponseWriter, r *http.Request) {
 	golog.Info("/api/products GET")
 
-	db := helper.OpenDatabaseConnection()
-	defer db.Close()
-
-	var products []Product
-
-	db.Where("product_status = ?", OPENED).Find(&products)
-
-	availableProductForRentingResponseList := mapper.ToAvailableProductForRentingResponseList(products)
-
-	response := OK(availableProductForRentingResponseList)
-
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	json.NewEncoder(w).Encode(response)
+	json.NewEncoder(w).Encode(productController.ToAvailableProductForRentingResponseList(productController.GetAllAvailableProducts()))
 }
 
-func GetOneProductDetails(w http.ResponseWriter, r *http.Request) {
+func (productController *ProductController) GetOneProductDetailsHandler(w http.ResponseWriter, r *http.Request) {
 	golog.Info("/api/products/{productId}")
 
-	db := helper.OpenDatabaseConnection()
-	defer db.Close()
-
 	parameters := mux.Vars(r)
-	productId := parameters["productId"]
+	productId, _ := strconv.ParseInt(parameters["productId"], 10, 32)
 
-	var product Product
 	var response WebResponse
 
-	if db.Where("id = ?", productId).Find(&product).RecordNotFound() {
-		golog.Warn("product with ID " + productId + " not found!")
-		response = ERROR(PRODUCT_NOT_FOUND)
+	product, errorCode := productController.GetOneProductDetails(int(productId))
+	if errorCode == 0 {
+		response = OK(productController.ToProductDetailResponse(product))
 	} else {
-		productDetailResponse := mapper.ToProductDetailResponse(product)
-		response = OK(productDetailResponse)
+		response = ERROR(errorCode)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -183,7 +78,7 @@ func GetOneProductDetails(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
-func GetProductImage(w http.ResponseWriter, r *http.Request) {
+func (productController *ProductController) GetProductImageHandler(w http.ResponseWriter, r *http.Request) {
 	parameters := mux.Vars(r)
 	imageName := parameters["imageName"]
 
