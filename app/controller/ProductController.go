@@ -33,7 +33,6 @@ func (productController *ProductController) UploadProductHandler(w http.Response
 
 	r.Body = http.MaxBytesReader(w, r.Body, MAX_FILE_UPLOAD_SIZE)
 	if err := r.ParseMultipartForm(MAX_FILE_UPLOAD_SIZE); err != nil {
-		golog.Warn("File too big")
 		response = ERROR(UPLOAD_PRODUCT_FAILED_FILE_TOO_BIG)
 		json.NewEncoder(w).Encode(response)
 		return
@@ -57,7 +56,7 @@ func (productController *ProductController) GetAllAvailableProductsHandler(w htt
 
 	w.Header().Set(CONTENT_TYPE, APPLICATION_JSON)
 	w.Header().Set(ACCESS_CONTROL_ALLOW_ORIGIN, ALL)
-	json.NewEncoder(w).Encode(productController.ToAvailableProductForRentingResponseList(productController.GetAllAvailableProducts()))
+	json.NewEncoder(w).Encode(OK(productController.ToAvailableProductForRentingResponseList(productController.GetAllAvailableProducts())))
 }
 
 func (productController *ProductController) GetOneProductDetailsHandler(w http.ResponseWriter, r *http.Request) {

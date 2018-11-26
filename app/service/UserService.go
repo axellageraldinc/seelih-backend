@@ -4,7 +4,6 @@ import (
 	. "../model"
 	. "../model/request"
 	. "../repository"
-	"github.com/kataras/golog"
 	"golang.org/x/crypto/bcrypt"
 	"log"
 )
@@ -22,7 +21,6 @@ type UserService struct {
 func (userService *UserService) Register(request RegisterRequest) (bool, uint) {
 	var user User
 	if userService.DoesUserEmailExist(request.Email) {
-		golog.Warn("User with email " + request.Email + " already exists in DB")
 		return false, REGISTER_FAILED_EMAIL_ALREADY_EXISTS
 	} else {
 		plainPasswordInByte := ConvertPlainPasswordToByte(request.Password)
@@ -36,10 +34,8 @@ func (userService *UserService) Register(request RegisterRequest) (bool, uint) {
 			Phone:       request.Phone,
 		}
 		if userService.SaveUser(user) {
-			golog.Info("User registration succeed")
 			return true, 0
 		} else {
-			golog.Warn("User registration failed")
 			return false, REGISTER_FAILED_WONT_SAVE_TO_DATABASE
 		}
 	}
@@ -52,14 +48,11 @@ func (userService *UserService) Login(request LoginRequest) (User, uint) {
 		userHashedPasswordFromDatabase := userInDatabase.Password
 		isPasswordTrue := comparePasswords(userHashedPasswordFromDatabase, ConvertPlainPasswordToByte(plainPassword))
 		if isPasswordTrue {
-			golog.Info("Login succeed")
 			return userInDatabase, 0
 		} else {
-			golog.Warn("Login failed, wrong password")
 			return User{}, LOGIN_FAILED
 		}
 	} else {
-		golog.Warn("Login failed, user with email " + request.Email + " not found")
 		return User{}, LOGIN_FAILED
 	}
 }
@@ -67,10 +60,8 @@ func (userService *UserService) Login(request LoginRequest) (User, uint) {
 func (userService *UserService) GetUserData(userId int) (User, uint) {
 	if userService.DoesUserIdExist(userId) {
 		var user = userService.FindUserById(userId)
-		golog.Info("Get User Data Succeed")
 		return user, 0
 	} else {
-		golog.Warn("No such user with id: " + string(userId))
 		return User{}, LOGIN_FAILED
 	}
 }
@@ -81,10 +72,7 @@ func HashAndSalt(bytePlainPassword []byte) string {
 	// package along with DefaultCost & MaxCost.
 	// The cost can be any value you want provided it isn't lower
 	// than the MinCost (4)
-	hash, err := bcrypt.GenerateFromPassword(bytePlainPassword, bcrypt.MinCost)
-	if err != nil {
-		log.Println(err)
-	}
+	hash, _ := bcrypt.GenerateFromPassword(bytePlainPassword, bcrypt.MinCost)
 	// GenerateFromPassword returns a byte slice so we need to
 	// convert the bytes to a string and return it
 	return string(hash)

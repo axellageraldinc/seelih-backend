@@ -5,7 +5,6 @@ import (
 	. "../model/request"
 	. "../model/response"
 	. "../repository"
-	"github.com/kataras/golog"
 	"time"
 )
 
@@ -24,29 +23,22 @@ type OrderService struct {
 }
 
 func (orderService *OrderService) PlaceOrder(request PlaceOrderRequest) uint {
-	var errorCode uint
 	if !orderService.DoesProductIdExist(int(request.ProductId)) {
-		errorCode = ORDER_FAILED_PRODUCT_ID_NOT_FOUND
+		return ORDER_FAILED_PRODUCT_ID_NOT_FOUND
 	} else {
 		product := orderService.FindProductById(int(request.ProductId))
 		if product.ProductStatus == CLOSED {
-			golog.Warn("Product is not available for renting")
-			errorCode = ORDER_FAILED_PRODUCT_NOT_AVAILABLE_FOR_RENTING
+			return ORDER_FAILED_PRODUCT_NOT_AVAILABLE_FOR_RENTING
 		} else if request.BorrowerId == product.TenantID {
-			golog.Warn("The borrower is the tenant, can't proceed!")
-			errorCode = ORDER_FAILED_BORROWER_IS_THE_TENANT
+			return ORDER_FAILED_BORROWER_IS_THE_TENANT
 		} else if request.Duration < product.MinimumBorrowedTime {
-			golog.Warn("Rent duration requested by user doesn't meet the product's min rent duration")
-			errorCode = ORDER_FAILED_RENT_DURATION_DOESNT_MEET_MINIMUM_RENT_DURATION
+			return ORDER_FAILED_RENT_DURATION_DOESNT_MEET_MINIMUM_RENT_DURATION
 		} else if request.Duration > product.MaximumBorrowedTime {
-			golog.Warn("Rent duration requested by user exceeds the product's max rent duration")
-			errorCode = ORDER_FAILED_RENT_DURATION_EXCEEDS_PRODUCT_MAX_RENT_DURATION
+			return ORDER_FAILED_RENT_DURATION_EXCEEDS_PRODUCT_MAX_RENT_DURATION
 		} else if request.Quantity > product.Quantity {
-			golog.Warn("Quantity requested by user exceeds the product's quantity")
-			errorCode = ORDER_FAILED_QUANTITY_EXCEEDS_PRODUCT_QUANTITY
+			return ORDER_FAILED_QUANTITY_EXCEEDS_PRODUCT_QUANTITY
 		} else if !orderService.DoesUserIdExist(int(request.BorrowerId)) {
-			golog.Warn("Borrower not exists in database")
-			errorCode = ORDER_FAILED_BORROWER_ID_NOT_FOUND
+			return ORDER_FAILED_BORROWER_ID_NOT_FOUND
 		} else {
 			totalPrice := (product.PricePerItemPerDay * request.Quantity) * request.Duration
 			remainingProductQuantity := product.Quantity - request.Quantity
@@ -68,11 +60,9 @@ func (orderService *OrderService) PlaceOrder(request PlaceOrderRequest) uint {
 				ReturnTime:        time.Now().Add(time.Hour * 24 * time.Duration(request.Duration)),
 			}
 			orderService.SaveOrder(order)
-			golog.Info("Order is placed successfully!")
-			errorCode = 0
+			return 0
 		}
 	}
-	return errorCode
 }
 
 func (orderService *OrderService) GetAllOrders(userId int) (orders []OrderResponse, errorCode uint) {
@@ -85,7 +75,6 @@ func (orderService *OrderService) ConfirmProductRetrieval(request ConfirmProduct
 	} else {
 		var order = orderService.FindOrderById(int(request.OrderId))
 		orderService.UpdateOrderStatus(order, RETRIEVED)
-		golog.Info("Confirm product retrieval succeed")
 		return 0
 	}
 }
@@ -96,7 +85,6 @@ func (orderService *OrderService) ConfirmProductReturn(request ConfirmProductRet
 	} else {
 		var order = orderService.FindOrderById(int(request.OrderId))
 		orderService.UpdateOrderStatus(order, DONE)
-		golog.Info("Confirm product return succeed")
 		return 0
 	}
 }
@@ -108,13 +96,10 @@ func (orderService *OrderService) ConfirmProductCancellation(request ConfirmProd
 		var order = orderService.FindOrderById(int(request.OrderId))
 		var product = orderService.FindProductById(int(order.ProductID))
 		if order.OrderStatus == ON_PROCESS {
-			order = orderService.FindOrderById(int(request.OrderId))
 			orderService.UpdateOrderStatus(order, CANCELLED)
 			orderService.UpdateProductStatus(product, OPENED)
-			golog.Info("Confirm product cancellation succeed")
 			return 0
 		} else {
-			golog.Warn("Order cancellation failed. Order is not ON_PROCESS.")
 			return ORDER_CANCELLATION_FAILED
 		}
 	}
